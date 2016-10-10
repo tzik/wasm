@@ -18,6 +18,15 @@ c_out_opt = -S -emit-llvm -o
 
 opt_flags = -O3 -std-link-opts -S -internalize -internalize-public-api-list=main
 
+rule configure
+  command = ./configure
+  description = CONFIGURE
+  depfile = $out.dep
+  restat = 1
+  generator = 1
+
+build build.ninja: configure
+
 rule cc
   command = $cc $cpp_flags $cc_flags $c_deps_opt $depfile $c_out_opt $out $in
   description = CC $out

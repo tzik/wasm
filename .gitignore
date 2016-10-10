@@ -1,4 +1,6 @@
+/.ninja_deps
+/.ninja_log
+/build.ninja
+/build.ninja.dep
 /lib/
 /out/
-/.ninja_log
-/.ninja_deps

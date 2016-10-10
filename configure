@@ -1,3 +1,8 @@
+#!/bin/bash
+set -e
+cd "$(dirname "$0")"
+
+cat > build.ninja.tmp <<EOF
 include etc/rules.ninja
 
 build out/hello_world.ll: cxx src/hello_world.cc
@@ -112,3 +117,15 @@ build out/run.stamp: run | src/run.js out/main.wasm
   binary = out/main.wasm
 
 default out/run.stamp
+EOF
+
+cat > build.ninja.dep <<EOF
+build.ninja: configure
+EOF
+
+if [ ! -e "build.ninja" ] || ! cmp build.ninja build.ninja.tmp; then
+  mv build.ninja.tmp build.ninja
+else
+  rm build.ninja.tmp
+fi
+
