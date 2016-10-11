@@ -1,0 +1,11 @@
+{
+  "output": "//out/main.ninja",
+  "template": "main.ninja.template",
+  "data": {
+    "obj_prefix": "out/main/",
+    "src_prefix": "src/",
+    "srcs": [
+      "hello_world.cc"
+    ]
+  }
+}

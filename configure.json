@@ -1,0 +1,10 @@
+{
+  "output": "build.ninja",
+  "template": "build.ninja.template",
+  "data": {},
+  "components": [
+    "lib-overlay/compiler-rt",
+    "lib-overlay/musl",
+    "src"
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "output": "//out/compiler-rt.ninja",
+  "template": "compiler-rt.ninja.template",
+  "data": {
+    "obj_prefix": "out/compiler-rt/",
+    "src_prefix": "lib/compiler-rt/lib/",
+    "srcs": [
+      "builtins/addtf3.c",
+      "builtins/ashlti3.c",
+      "builtins/comparetf2.c",
+      "builtins/extenddftf2.c",
+      "builtins/fixtfsi.c",
+      "builtins/fixunstfsi.c",
+      "builtins/floatsitf.c",
+      "builtins/floatunsitf.c",
+      "builtins/lshrti3.c",
+      "builtins/multf3.c",
+      "builtins/multi3.c",
+      "builtins/subtf3.c"
+    ]
+  }
+}

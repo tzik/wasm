@@ -1,0 +1,42 @@
+{
+  "output": "//out/musl.ninja",
+  "template": "musl.ninja.template",
+  "data": {
+    "obj_prefix": "out/musl/",
+    "src_prefix": "lib/musl/src/",
+    "srcs": [
+      "errno/__errno_location.c",
+      "errno/strerror.c",
+      "internal/libc.c",
+      "internal/syscall_ret.c",
+      "locale/__lctrans.c",
+      "math/__fpclassifyl.c",
+      "math/__signbitl.c",
+      "math/frexpl.c",
+      "multibyte/wcrtomb.c",
+      "multibyte/wctomb.c",
+      "stdio/__lockfile.c",
+      "stdio/__overflow.c",
+      "stdio/__stdio_close.c",
+      "stdio/__stdio_exit.c",
+      "stdio/__stdio_seek.c",
+      "stdio/__stdio_write.c",
+      "stdio/__stdout_write.c",
+      "stdio/__towrite.c",
+      "stdio/fputs.c",
+      "stdio/fwrite.c",
+      "stdio/ofl.c",
+      "stdio/printf.c",
+      "stdio/puts.c",
+      "stdio/stdout.c",
+      "stdio/vfprintf.c",
+      "string/memchr.c",
+      "string/memcpy.c",
+      "string/memset.c",
+      "string/strlen.c",
+      "thread/__lock.c",
+      "thread/__wait.c",
+      "thread/pthread_self.c"
+    ]
+  }
+}

@@ -1,0 +1,7 @@
+include etc/rules.ninja
+
+subninja out/compiler-rt.ninja
+subninja out/musl.ninja
+# subninja out/libcxxabi.ninja
+# subninja out/libcxx.ninja
+subninja out/main.ninja

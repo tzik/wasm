@@ -1,131 +1,68 @@
-#!/bin/bash
-set -e
-cd "$(dirname "$0")"
+#!/usr/bin/python3
 
-cat > build.ninja.tmp <<EOF
-include etc/rules.ninja
+import jinja2
+import json
+import sys
+import os
 
-build out/hello_world.ll: cxx src/hello_world.cc
+def canonicalize_path(wd, p):
+  if p.startswith('//'):
+    return p[2:]
+  if p.startswith('/'):
+    return p
+  return os.path.join(wd, p)
 
-build out/musl/errno/__errno_location.ll: cc lib/musl/src/errno/__errno_location.c
-build out/musl/errno/strerror.ll: cc lib/musl/src/errno/strerror.c
-build out/musl/internal/libc.ll: cc lib/musl/src/internal/libc.c
-build out/musl/internal/syscall_ret.ll: cc lib/musl/src/internal/syscall_ret.c
-build out/musl/math/__fpclassifyl.ll: cc lib/musl/src/math/__fpclassifyl.c
-build out/musl/math/__signbitl.ll: cc lib/musl/src/math/__signbitl.c
-build out/musl/math/frexpl.ll: cc lib/musl/src/math/frexpl.c
-build out/musl/stdio/__lockfile.ll: cc lib/musl/src/stdio/__lockfile.c
-build out/musl/stdio/__stdio_exit.ll: cc lib/musl/src/stdio/__stdio_exit.c
-build out/musl/stdio/__towrite.ll: cc lib/musl/src/stdio/__towrite.c
-build out/musl/stdio/__overflow.ll: cc lib/musl/src/stdio/__overflow.c
-build out/musl/stdio/fwrite.ll: cc lib/musl/src/stdio/fwrite.c
-build out/musl/stdio/ofl.ll: cc lib/musl/src/stdio/ofl.c
-build out/musl/stdio/puts.ll: cc lib/musl/src/stdio/puts.c
-build out/musl/stdio/fputs.ll: cc lib/musl/src/stdio/fputs.c
-build out/musl/stdio/__stdout_write.ll: cc lib/musl/src/stdio/__stdout_write.c
-build out/musl/stdio/__stdio_seek.ll: cc lib/musl/src/stdio/__stdio_seek.c
-build out/musl/stdio/__stdio_close.ll: cc lib/musl/src/stdio/__stdio_close.c
-build out/musl/stdio/__stdio_write.ll: cc lib/musl/src/stdio/__stdio_write.c
-build out/musl/stdio/printf.ll: cc lib/musl/src/stdio/printf.c
-build out/musl/stdio/stdout.ll: cc lib/musl/src/stdio/stdout.c
-build out/musl/stdio/vfprintf.ll: cc lib/musl/src/stdio/vfprintf.c
-build out/musl/string/strlen.ll: cc lib/musl/src/string/strlen.c
-build out/musl/string/memchr.ll: cc lib/musl/src/string/memchr.c
-build out/musl/string/memcpy.ll: cc lib/musl/src/string/memcpy.c
-build out/musl/locale/__lctrans.ll: cc lib/musl/src/locale/__lctrans.c
-build out/musl/multibyte/wctomp.ll: cc lib/musl/src/multibyte/wctomb.c
-build out/musl/multibyte/wcrtomp.ll: cc lib/musl/src/multibyte/wcrtomb.c
-build out/musl/string/memset.ll: cc lib/musl/src/string/memset.c
-build out/musl/thread/__lock.ll: cc lib/musl/src/thread/__lock.c
-build out/musl/thread/__wait.ll: cc lib/musl/src/thread/__wait.c
-build out/musl/thread/pthread_self.ll: cc lib/musl/src/thread/pthread_self.c
+def canonicalize_each(wd, paths):
+  return [canonicalize_path(wd, p) for p in paths]
 
-build out/musl.ll: link $
-  out/musl/multibyte/wcrtomp.ll $
-  out/musl/multibyte/wctomp.ll $
-  out/musl/errno/__errno_location.ll $
-  out/musl/errno/strerror.ll $
-  out/musl/math/__fpclassifyl.ll $
-  out/musl/math/__signbitl.ll $
-  out/musl/math/frexpl.ll $
-  out/musl/stdio/__lockfile.ll $
-  out/musl/stdio/fwrite.ll $
-  out/musl/stdio/ofl.ll $
-  out/musl/stdio/puts.ll $
-  out/musl/stdio/fputs.ll $
-  out/musl/stdio/printf.ll $
-  out/musl/stdio/stdout.ll $
-  out/musl/stdio/__stdout_write.ll $
-  out/musl/stdio/__stdio_seek.ll $
-  out/musl/stdio/__stdio_close.ll $
-  out/musl/stdio/__stdio_write.ll $
-  out/musl/stdio/vfprintf.ll $
-  out/musl/stdio/__stdio_exit.ll $
-  out/musl/stdio/__towrite.ll $
-  out/musl/stdio/__overflow.ll $
-  out/musl/thread/pthread_self.ll $
-  out/musl/thread/__wait.ll $
-  out/musl/internal/libc.ll $
-  out/musl/internal/syscall_ret.ll $
-  out/musl/thread/__lock.ll $
-  out/musl/locale/__lctrans.ll $
-  out/musl/string/memcpy.ll $
-  out/musl/string/strlen.ll $
-  out/musl/string/memset.ll $
-  out/musl/string/memchr.ll
 
-build out/compiler-rt/builtins/addtf3.ll: cc lib/compiler-rt/lib/builtins/addtf3.c
-build out/compiler-rt/builtins/ashlti3.ll: cc lib/compiler-rt/lib/builtins/ashlti3.c
-build out/compiler-rt/builtins/comparetf2.ll: cc lib/compiler-rt/lib/builtins/comparetf2.c
-build out/compiler-rt/builtins/extenddftf2.ll: cc lib/compiler-rt/lib/builtins/extenddftf2.c
-build out/compiler-rt/builtins/fixtfsi.ll: cc lib/compiler-rt/lib/builtins/fixtfsi.c
-build out/compiler-rt/builtins/fixunstfsi.ll: cc lib/compiler-rt/lib/builtins/fixunstfsi.c
-build out/compiler-rt/builtins/floatsitf.ll: cc lib/compiler-rt/lib/builtins/floatsitf.c
-build out/compiler-rt/builtins/floatunsitf.ll: cc lib/compiler-rt/lib/builtins/floatunsitf.c
-build out/compiler-rt/builtins/lshrti3.ll: cc lib/compiler-rt/lib/builtins/lshrti3.c
-build out/compiler-rt/builtins/multf3.ll: cc lib/compiler-rt/lib/builtins/multf3.c
-build out/compiler-rt/builtins/multi3.ll: cc lib/compiler-rt/lib/builtins/multi3.c
-build out/compiler-rt/builtins/subtf3.ll: cc lib/compiler-rt/lib/builtins/subtf3.c
+def generate_build_file(wd):
+  environment = jinja2.Environment(loader=jinja2.FileSystemLoader('.'),
+                                   keep_trailing_newline=True,
+                                   trim_blocks=False)
 
-build out/compiler-rt.ll: link $
-  out/compiler-rt/builtins/addtf3.ll $
-  out/compiler-rt/builtins/ashlti3.ll $
-  out/compiler-rt/builtins/comparetf2.ll $
-  out/compiler-rt/builtins/extenddftf2.ll $
-  out/compiler-rt/builtins/fixtfsi.ll $
-  out/compiler-rt/builtins/fixunstfsi.ll $
-  out/compiler-rt/builtins/floatsitf.ll $
-  out/compiler-rt/builtins/floatunsitf.ll $
-  out/compiler-rt/builtins/lshrti3.ll $
-  out/compiler-rt/builtins/subtf3.ll $
-  out/compiler-rt/builtins/multi3.ll $
-  out/compiler-rt/builtins/multf3.ll
+  configure_file = canonicalize_path(wd, 'configure.json')
+  with open(configure_file) as fp:
+    configure = json.load(fp)
 
-build out/main.preopt.ll: link $
-  out/hello_world.ll out/musl.ll out/compiler-rt.ll
+  template_file = canonicalize_path(wd, configure['template'])
+  template = environment.get_template(template_file)
 
-build out/main.opt.ll: opt out/main.preopt.ll
+  build_file = canonicalize_path(wd, configure['output'])
+  content = template.render(configure['data'])
 
-# TODO(tzik): GC unused functions.
+  deps = [configure_file, template_file]
+  components = canonicalize_each(wd, configure.get('components', []))
 
-build out/main.s: llc out/main.opt.ll
-build out/main.wast: s2wast out/main.s
-build out/main.wasm: wast2wasm out/main.wast
+  try:
+    parent = os.path.dirname(build_file)
+    if parent:
+      os.makedirs(parent)
+  except FileExistsError:
+    pass
+  with open(build_file, 'w') as fp:
+    fp.write(content)
 
-build out/run.stamp: run | src/run.js out/main.wasm
-  driver = src/run.js
-  binary = out/main.wasm
+  return build_file, deps, components
 
-default out/run.stamp
-EOF
+def main(argv):
+  configure_script_abs = os.path.realpath(__file__)
+  os.chdir(os.path.dirname(__file__))
+  configure_script = os.path.relpath(configure_script_abs)
 
-cat > build.ninja.dep <<EOF
-build.ninja: configure
-EOF
+  out, deps, components = generate_build_file('')
+  while len(components) > 0:
+    c = components[0]
+    components = components[1:]
 
-if [ ! -e "build.ninja" ] || ! cmp build.ninja build.ninja.tmp; then
-  mv build.ninja.tmp build.ninja
-else
-  rm build.ninja.tmp
-fi
+    _, ds, cs = generate_build_file(c)
+    deps += ds
+    components += cs
 
+  deps.append(configure_script)
+  with open(out + '.dep', 'w') as fp:
+    fp.write('%s: %s' % (out, ' '.join(deps)))
+  return 0
+    
+if __name__ == '__main__':
+  sys.exit(main(sys.argv[1:]))
