@@ -16,7 +16,7 @@ cxx_flags = $chost $cxx_standard -nostdinc -nostdinc++
 c_deps_opt = -MMD -MF
 c_out_opt = -S -emit-llvm -o
 
-opt_flags = -O3 -std-link-opts -S -internalize -internalize-public-api-list=main
+opt_flags = -O3 -std-link-opts -S -internalize -internalize-public-api-list=entry_point
 
 rule configure
   command = ./configure
@@ -49,7 +49,7 @@ rule llc
   command = llc -filetype asm -o $out $in
 
 rule s2wast
-  command = s2wasm -s 1024 -o $out $in
+  command = s2wasm -s 10240 -o $out $in
   description = S2WASM $out
 
 rule wast2wasm

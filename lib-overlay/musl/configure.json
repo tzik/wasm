@@ -34,6 +34,12 @@
       "string/memcpy.c",
       "string/memset.c",
       "string/strlen.c",
+      "malloc/malloc.c",
+      "malloc/expand_heap.c",
+      "mman/madvise.c",
+      "mman/mremap.c",
+      "mman/munmap.c",
+      "mman/mmap.c",
       "thread/__lock.c",
       "thread/__wait.c",
       "thread/pthread_self.c"

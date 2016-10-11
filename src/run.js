@@ -102,7 +102,15 @@ class Syscall {
   syscall_pipe(...args) { return this.unimplemented("pipe", ...args); }
   syscall_times(...args) { return this.unimplemented("times", ...args); }
   syscall_prof(...args) { return this.unimplemented("prof", ...args); }
-  syscall_brk(...args) { return this.unimplemented("brk", ...args); }
+
+  syscall_brk(p) {
+    let mem = this.instance.exports.memory.buffer;
+    let reserved_for_mmap = 4096;
+    if (p <= mem.byteLength - reserved_for_mmap)
+      return 0;
+    return -1;
+  }
+
   syscall_setgid(...args) { return this.unimplemented("setgid", ...args); }
   syscall_getgid(...args) { return this.unimplemented("getgid", ...args); }
   syscall_signal(...args) { return this.unimplemented("signal", ...args); }
@@ -279,7 +287,27 @@ class Syscall {
   syscall_putpmsg(...args) { return this.unimplemented("putpmsg", ...args); }
   syscall_vfork(...args) { return this.unimplemented("vfork", ...args); }
   syscall_ugetrlimit(...args) { return this.unimplemented("ugetrlimit", ...args); }
-  syscall_mmap2(...args) { return this.unimplemented("mmap2", ...args); }
+
+  syscall_mmap2(addr, length, prot, flags, fd, pgoffset) {
+    // PROT_READ | PROT_WRITE == 3
+    // MAP_PRIVATE | MAP_ANON == 0x22
+    if (addr !== 0 || fd !== -1 || pgoffset !== 0 ||
+        prot !== 3 || flags !== 0x22) {
+      return this.unimplemented("mmap2", ...arguments);
+    }
+
+    // this.instance.exports.memory.grow() is not implemented yet.
+
+    if (length !== 4096 || this.not_first) {
+      return this.unimplemented("mmap2", ...arguments);
+    }
+    this.not_first = true;
+
+    let mem = this.instance.exports.memory.buffer;
+    let reserved_for_mmap = 4096;
+    return mem.byteLength - reserved_for_mmap;
+  }
+
   syscall_truncate64(...args) { return this.unimplemented("truncate64", ...args); }
   syscall_ftruncate64(...args) { return this.unimplemented("ftruncate64", ...args); }
   syscall_stat64(...args) { return this.unimplemented("stat64", ...args); }
@@ -887,12 +915,22 @@ class Runtime {
     this.instance = null;
   }
 
-  a_cas() { print("unimplemented: a_dec"); quit(1); }
+  a_and() { print("unimplemented: a_and"); quit(1); }
+
+  a_or(p, v) {
+    let mem = this.instance.exports.memory.buffer;
+    let s = new Int32Array(mem, p, 1);
+    s[0] |= v;
+  }
+
+  a_cas() { print("unimplemented: a_cas"); quit(1); }
   a_dec() { print("unimplemented: a_dec"); quit(1); }
   a_inc() { print("unimplemented: a_inc"); quit(1); }
   a_spin() { print("unimplemented: a_spin"); quit(1); }
   a_store() { print("unimplemented: a_store"); quit(1); }
   a_swap() { print("unimplemented: a_swap"); quit(1); }
+  a_crash() { print("unimplemented: a_crash"); quit(1); }
+  a_ctz_64() { print("unimplemented: a_ctz_64"); quit(1); }
 
   printn(p, n) {
     let mem = this.instance.exports.memory.buffer;
@@ -903,15 +941,31 @@ class Runtime {
     print(cs.join(''));
   }
 
+  get_args_buffer_size() {
+    return 4;
+  }
+  
+  get_args(p) {
+    let mem = this.instance.exports.memory.buffer;
+    let s = new Uint32Array(mem, p, 1);
+    s[0] = 0;
+  }
+
   makeEnvObject() {
     return {
       printn: this.printn.bind(this),
+      a_and: this.a_and.bind(this),
+      a_or: this.a_or.bind(this),
       a_cas: this.a_cas.bind(this),
       a_dec: this.a_dec.bind(this),
       a_inc: this.a_inc.bind(this),
-      a_spin: this.a_inc.bind(this),
-      a_store: this.a_inc.bind(this),
-      a_swap: this.a_inc.bind(this),
+      a_spin: this.a_spin.bind(this),
+      a_store: this.a_store.bind(this),
+      a_swap: this.a_swap.bind(this),
+      a_crash: this.a_crash.bind(this),
+      a_ctz_64: this.a_ctz_64.bind(this),
+      get_args_buffer_size: this.get_args_buffer_size.bind(this),
+      get_args: this.get_args.bind(this)
     };
   }
 }
@@ -939,7 +993,7 @@ class Runtime {
   timing.emit("instantiate");
 
   // TODO(tzik): Pass args.
-  let rv = instance.exports.main();
+  let rv = instance.exports.entry_point();
   timing.emit("execute");
   quit(rv);
 })(...arguments).catch(e => {
