@@ -7,7 +7,8 @@
     "srcs": [
       "irt.cc",
       "syscall.cc",
-      "pthread.cc"
+      "pthread.cc",
+      "atomic.cc"
     ]
   }
 }

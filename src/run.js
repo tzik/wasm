@@ -946,16 +946,7 @@ class Runtime {
   makeEnvObject() {
     return {
       printn: this.printn.bind(this),
-      a_and: this.a_and.bind(this),
-      a_or: this.a_or.bind(this),
-      a_cas: this.a_cas.bind(this),
-      a_dec: this.a_dec.bind(this),
-      a_inc: this.a_inc.bind(this),
-      a_spin: this.a_spin.bind(this),
-      a_store: this.a_store.bind(this),
-      a_swap: this.a_swap.bind(this),
-      a_crash: this.a_crash.bind(this),
-      a_ctz_64: this.a_ctz_64.bind(this),
+      crash: ()=>quit(1),
       get_args_buffer_size: this.get_args_buffer_size.bind(this),
       get_args: this.get_args.bind(this)
     };
