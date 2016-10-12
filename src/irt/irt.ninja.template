@@ -1,0 +1,7 @@
+{% for src in srcs -%}
+build {{obj_prefix}}{{src|replace('.cc', '.ll')}} : cxx {{src_prefix}}{{src}}
+{% endfor %}
+build out/irt.ll: link
+{%- for src in srcs %} $
+  {{obj_prefix}}{{src|replace('.cc', '.ll')}}
+{%- endfor %}

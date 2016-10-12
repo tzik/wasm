@@ -1,7 +1,9 @@
 include etc/rules.ninja
+build build.ninja: configure
 
 subninja out/compiler-rt.ninja
 subninja out/musl.ninja
 # subninja out/libcxxabi.ninja
 # subninja out/libcxx.ninja
-subninja out/main.ninja
+subninja out/irt.ninja
+subninja out/hello_world.ninja

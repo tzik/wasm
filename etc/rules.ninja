@@ -25,8 +25,6 @@ rule configure
   restat = 1
   generator = 1
 
-build build.ninja: configure
-
 rule cc
   command = $cc $cpp_flags $cc_flags $c_deps_opt $depfile $c_out_opt $out $in
   description = CC $out

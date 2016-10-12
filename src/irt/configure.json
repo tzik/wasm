@@ -1,0 +1,11 @@
+{
+  "output": "//out/irt.ninja",
+  "template": "irt.ninja.template",
+  "data": {
+    "obj_prefix": "out/irt/",
+    "src_prefix": "src/irt/",
+    "srcs": [
+      "irt.cc"
+    ]
+  }
+}

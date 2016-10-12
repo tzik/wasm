@@ -25,24 +25,28 @@ def generate_build_file(wd):
   with open(configure_file) as fp:
     configure = json.load(fp)
 
-  template_file = canonicalize_path(wd, configure['template'])
-  template = environment.get_template(template_file)
+  build_file = None
+  deps = [configure_file]
+  if 'output' in configure:
+    build_file = canonicalize_path(wd, configure['output'])
 
-  build_file = canonicalize_path(wd, configure['output'])
-  content = template.render(configure['data'])
+    template_file = canonicalize_path(wd, configure['template'])
+    template = environment.get_template(template_file)
 
-  deps = [configure_file, template_file]
+    content = template.render(configure['data'])
+
+    deps.append(template_file)
+
+    try:
+      parent = os.path.dirname(build_file)
+      if parent:
+        os.makedirs(parent)
+    except FileExistsError:
+      pass
+    with open(build_file, 'w') as fp:
+      fp.write(content)
+
   components = canonicalize_each(wd, configure.get('components', []))
-
-  try:
-    parent = os.path.dirname(build_file)
-    if parent:
-      os.makedirs(parent)
-  except FileExistsError:
-    pass
-  with open(build_file, 'w') as fp:
-    fp.write(content)
-
   return build_file, deps, components
 
 def main(argv):
@@ -61,8 +65,8 @@ def main(argv):
 
   deps.append(configure_script)
   with open(out + '.dep', 'w') as fp:
-    fp.write('%s: %s' % (out, ' '.join(deps)))
+    fp.write('%s: %s\n' % (out, ' '.join(deps)))
   return 0
-    
+
 if __name__ == '__main__':
   sys.exit(main(sys.argv[1:]))

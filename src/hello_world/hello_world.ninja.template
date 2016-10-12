@@ -7,7 +7,7 @@ build out/main.ll: link
 {%- endfor %}
 
 build out/main.preopt.ll: link $
-  out/main.ll out/musl.ll out/compiler-rt.ll
+  out/main.ll out/irt.ll out/musl.ll out/compiler-rt.ll
 build out/main.opt.ll: opt out/main.preopt.ll
 
 # TODO(tzik): GC unused functions.
