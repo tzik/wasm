@@ -5,7 +5,9 @@
     "obj_prefix": "out/irt/",
     "src_prefix": "src/irt/",
     "srcs": [
-      "irt.cc"
+      "irt.cc",
+      "syscall.cc",
+      "pthread.cc"
     ]
   }
 }

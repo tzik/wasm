@@ -883,13 +883,7 @@ class Syscall {
 
   makeEnvObject() {
     return {
-      __syscall0: this.syscall.bind(this),
-      __syscall1: this.syscall.bind(this),
-      __syscall2: this.syscall.bind(this),
-      __syscall3: this.syscall.bind(this),
-      __syscall4: this.syscall.bind(this),
-      __syscall5: this.syscall.bind(this),
-      __syscall6: this.syscall.bind(this)
+      __syscall: this.syscall.bind(this)
     };
   }
 }
@@ -904,9 +898,7 @@ class PThread {
   }
 
   makeEnvObject() {
-    return {
-      __pthread_self: this.pthread_self.bind(this)
-    };
+    return {};
   }
 }
   
