@@ -887,20 +887,6 @@ class Syscall {
     };
   }
 }
-
-class PThread {
-  constructor() {
-    this.instance = null;
-  }
-
-  pthread_self() {
-    return 1;
-  }
-
-  makeEnvObject() {
-    return {};
-  }
-}
   
 class Runtime {
   constructor() {
@@ -989,18 +975,15 @@ function toUTF8(s) {
   
   let runtime = new Runtime;
   let syscall = new Syscall;
-  let pthread = new PThread;
   let env = combineEnvObject(
     runtime.makeEnvObject(),
-    syscall.makeEnvObject(),
-    pthread.makeEnvObject());
+    syscall.makeEnvObject());
 
   runtime.set_args(...args);
 
   let instance = new WebAssembly.Instance(module, {env});
   runtime.instance = instance;
   syscall.instance = instance;
-  pthread.instance = instance;
   timing.emit("instantiate");
 
   let rv = instance.exports.entry_point();
