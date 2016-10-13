@@ -221,27 +221,7 @@ class Syscall {
   syscall_flock(...args) { return this.unimplemented("flock", ...args); }
   syscall_msync(...args) { return this.unimplemented("msync", ...args); }
   syscall_readv(...args) { return this.unimplemented("readv", ...args); }
-
-  syscall_writev(fd, p, n) {
-    let mem = this.instance.exports.memory.buffer;
-
-    let ret = 0;
-    for (let i = 0; i < n; ++i) {
-      // struct iovec
-      // sizeof(iovec) == sizeof(size_t) + sizeof(void*) == 8
-      let s = new Uint32Array(mem, p + i * 8, 2);
-      let iov_base = s[0]; // iov_base
-      let iov_len = s[1];
-      let res = this.syscall_write(fd, iov_base, iov_len);
-      if (res < 0)
-        return res;
-      ret += res;
-      if (res < iov_len)
-        return ret;
-    }
-    return ret;
-  }
-
+  syscall_writev(fd, p, n) { return this.unimplemented("getsid", ...args); }
   syscall_getsid(...args) { return this.unimplemented("getsid", ...args); }
   syscall_fdatasync(...args) { return this.unimplemented("fdatasync", ...args); }
   syscall__sysctl(...args) { return this.unimplemented("_sysctl", ...args); }
