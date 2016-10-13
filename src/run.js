@@ -949,6 +949,8 @@ function toUTF8(s) {
   let timing = new Timing();
   let binary = readbuffer(program_file);
   timing.emit("load");
+
+  print("binary size: " + binary.byteLength);
   
   let module = await WebAssembly.compile(binary);
   timing.emit("compile");

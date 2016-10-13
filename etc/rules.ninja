@@ -17,25 +17,7 @@ c_deps_opt = -MMD -MF
 c_out_opt = -S -emit-llvm -o
 
 opt_flags = -O3 -std-link-opts -S -internalize -internalize-public-api-list=entry_point
-wast_opt_flags = $
-  --duplicate-function-elimination $
-  --dce $
-  --remove-unused-brs $
-  --remove-unused-names $
-  --optimize-instructions $
-  --precompute $
-  --vacuum $
-  --remove-unused-brs $
-  --coalesce-locals $
-  --vacuum $
-  --reorder-locals $
-  --merge-blocks $
-  --optimize-instructions $
-  --precompute $
-  --vacuum $
-  --remove-unused-functions $
-  --duplicate-function-elimination
-
+wast_opt_flags = -O
 rule configure
   command = ./configure
   description = CONFIGURE
