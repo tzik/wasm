@@ -5,19 +5,3 @@ build out/main.ll: link
 {%- for src in srcs %} $
   {{obj_prefix}}{{src|replace('.cc', '.ll')}}
 {%- endfor %}
-
-build out/main.preopt.ll: link $
-  out/main.ll out/irt.ll out/musl.ll out/compiler-rt.ll
-build out/main.opt.ll: opt out/main.preopt.ll
-
-# TODO(tzik): GC unused functions.
-
-build out/main.s: llc out/main.opt.ll
-build out/main.wast: s2wast out/main.s
-build out/main.wasm: wast2wasm out/main.wast
-
-build out/run.stamp: run | src/run.js out/main.wasm
-  driver = src/run.js
-  binary = out/main.wasm
-
-default out/run.stamp

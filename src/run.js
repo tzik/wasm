@@ -905,24 +905,25 @@ class PThread {
 class Runtime {
   constructor() {
     this.instance = null;
+    this.utf8Args = [];
+    // 4 for argc. 4 for the trailing nullptr.
+    this.argsBufSize = 4 + 4;
   }
 
-  a_and() { print("unimplemented: a_and"); quit(1); }
+  set_args(...args) {
+    // 4 for argc. 4 for the trailing nullptr.
+    let argsBufSize = 4 + 4;
+    let utf8Args = [];
+    for (let arg of args) {
+      let x = toUTF8(arg);
+      // 4 for the argv value. 1 for the trailing '\0'.
+      argsBufSize += x.length + 4 + 1;
+      utf8Args.push(x);
+    }
 
-  a_or(p, v) {
-    let mem = this.instance.exports.memory.buffer;
-    let s = new Int32Array(mem, p, 1);
-    s[0] |= v;
+    this.utf8Args = utf8Args;
+    this.argsBufSize = argsBufSize;
   }
-
-  a_cas() { print("unimplemented: a_cas"); quit(1); }
-  a_dec() { print("unimplemented: a_dec"); quit(1); }
-  a_inc() { print("unimplemented: a_inc"); quit(1); }
-  a_spin() { print("unimplemented: a_spin"); quit(1); }
-  a_store() { print("unimplemented: a_store"); quit(1); }
-  a_swap() { print("unimplemented: a_swap"); quit(1); }
-  a_crash() { print("unimplemented: a_crash"); quit(1); }
-  a_ctz_64() { print("unimplemented: a_ctz_64"); quit(1); }
 
   printn(p, n) {
     let mem = this.instance.exports.memory.buffer;
@@ -934,13 +935,24 @@ class Runtime {
   }
 
   get_args_buffer_size() {
-    return 4;
+    return this.argsBufSize;
   }
   
   get_args(p) {
     let mem = this.instance.exports.memory.buffer;
-    let s = new Uint32Array(mem, p, 1);
-    s[0] = 0;
+    let view = new DataView(mem, p, this.argsBufSize);
+    let argc = this.utf8Args.length;
+
+    view.setUint32(0, argc, true);
+
+    // 4 for argc. 4 each for argv values. 4 for the trailing nullptr.
+    let k = 4 + 4 * argc + 4;
+    for (let i = 0; i < argc; ++i) {
+      view.setUint32(4 * (i + 1), k + p, true);
+      for (let c of this.utf8Args[i])
+        view.setUint8(k++, c);
+      ++k; // for '\0'.
+    }
   }
 
   makeEnvObject() {
@@ -951,6 +963,20 @@ class Runtime {
       get_args: this.get_args.bind(this)
     };
   }
+}
+
+function toUTF8(s) {
+  let encoded = encodeURIComponent(s);
+  let result = [];
+  for (let i = 0; i < encoded.length; ++i) {
+    if (encoded[i] === '%') {
+      result.push(parseInt(encoded.slice(1, 3), 16));
+      i += 2;
+    } else {
+      result.push(encoded[i].charCodeAt(0));
+    }
+  }
+  return result;
 }
 
 (async function(program_file, ...args) {
@@ -969,13 +995,14 @@ class Runtime {
     syscall.makeEnvObject(),
     pthread.makeEnvObject());
 
+  runtime.set_args(...args);
+
   let instance = new WebAssembly.Instance(module, {env});
   runtime.instance = instance;
   syscall.instance = instance;
   pthread.instance = instance;
   timing.emit("instantiate");
 
-  // TODO(tzik): Pass args.
   let rv = instance.exports.entry_point();
   timing.emit("execute");
   quit(rv);
