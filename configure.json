@@ -5,6 +5,8 @@
   "components": [
     "lib-overlay/compiler-rt",
     "lib-overlay/musl",
+    "lib-overlay/libcxxabi",
+    "lib-overlay/libcxx",
     "src"
   ]
 }

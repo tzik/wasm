@@ -7,3 +7,4 @@ cd lib
 [ -e "compiler-rt" ] || git clone --depth=1 "http://llvm.org/git/compiler-rt.git"
 [ -e "libcxxabi" ] || git clone --depth=1 "http://llvm.org/git/libcxxabi.git"
 [ -e "libcxx" ] || git clone --depth=1 "http://llvm.org/git/libcxx.git"
+[ -e "libunwind" ] || git clone --depth=1 "http://llvm.org/git/libunwind.git"

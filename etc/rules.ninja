@@ -1,6 +1,6 @@
 
-c_defines = -D_POSIX_SOURCE
-c_includes = -Ilib/musl/src/internal -Ilib-overlay/musl/arch/wasm32 -Ilib/musl/arch/generic -isystem lib/musl/include
+c_defines = -D_POSIX_SOURCE -D_LIBCPP_HAS_NO_THREADS -D__CLANG_MAX_ALIGN_T_DEFINED -D_LIBCXXABI_NO_EXCEPTIONS -D_LIBCPPABI_VERSION=1002 -DLIBCXX_BUILDING_LIBCXXABI -D_LIBCPP_HAS_MUSL_LIBC
+c_includes = -Ilib/libunwind/include -Ilib/musl/src/internal -Ilib-overlay/musl/arch/wasm32 -Ilib/musl/arch/generic -isystem lib/libcxxabi/include -isystem lib/libcxx/include -isystem lib/musl/include
 
 chost = -target wasm32
 cc_standard = -std=c11
@@ -10,8 +10,8 @@ cc = clang
 cxx = clang++
 
 cpp_flags = $c_defines $c_includes
-cc_flags = $chost $cc_standard -nostdinc
-cxx_flags = $chost $cxx_standard -nostdinc -nostdinc++
+cc_flags = $chost $cc_standard -nostdinc -fno-threadsafe-statics
+cxx_flags = $chost $cxx_standard -nostdinc -nostdinc++ -fno-exceptions -fno-rtti -fno-threadsafe-statics
 
 c_deps_opt = -MMD -MF
 c_out_opt = -S -emit-llvm -o
@@ -44,11 +44,15 @@ rule opt
   command = opt $opt_flags -o $out $in
 
 rule llc
-  command = llc -filetype asm -o $out $in
+  command = llc -O3 -filetype asm -o $out $in
 
 rule s2wast
-  command = s2wasm -s 10240 -o $out $in
+  command = s2wasm -e -s 10240 -g 1000 -o $out $in
   description = S2WASM $out
+
+rule metadata
+  command = sed -n 's/^;; METADATA: \(.*\)$$/\1/p' $in > $out
+  description = METADATA $out
 
 rule wast-opt
   command = wasm-opt $wast_opt_flags -o $out $in
@@ -59,5 +63,5 @@ rule wast2wasm
   description = WAST2WASM $out
 
 rule run
-  command = d8 --expose_wasm $driver -- $binary $args && touch $out
+  command = d8 --expose_wasm $driver -- $binary $metadata $args && touch $out
   description = RUN $binary

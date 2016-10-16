@@ -5,10 +5,12 @@
     "obj_prefix": "out/irt/",
     "src_prefix": "src/irt/",
     "srcs": [
+      "atomic.cc",
       "irt.cc",
-      "syscall.cc",
+      "page_allocator.cc",
       "pthread.cc",
-      "atomic.cc"
+      "syscall.cc",
+      "strtod.cc"
     ]
   }
 }

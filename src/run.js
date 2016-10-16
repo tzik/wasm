@@ -34,7 +34,7 @@ class Syscall {
   }
 
   ioctl_get_window_size(p) {
-    let mem = this.instance.exports.memory.buffer;
+    let mem = this.memory.buffer;
 
     // struct winsize
     let s = new Uint16Array(mem, p, 4);
@@ -53,11 +53,12 @@ class Syscall {
       return this.unimplemented("write", fd, p, n);
     }
     
-    let mem = this.instance.exports.memory.buffer;
+    let mem = this.memory.buffer;
     let s = new Uint8Array(mem, p, n);
     let cs = [];
     for (let c of s)
       cs.push(String.fromCharCode(c));
+
     write(cs.join(''));
     return n;
   }
@@ -104,11 +105,8 @@ class Syscall {
   syscall_prof(...args) { return this.unimplemented("prof", ...args); }
 
   syscall_brk(p) {
-    let mem = this.instance.exports.memory.buffer;
-    let reserved_for_mmap = 4096;
-    if (p <= mem.byteLength - reserved_for_mmap)
-      return 0;
-    return -1;
+    let mem = this.memory.buffer;
+    return mem.byteLength;
   }
 
   syscall_setgid(...args) { return this.unimplemented("setgid", ...args); }
@@ -267,27 +265,7 @@ class Syscall {
   syscall_putpmsg(...args) { return this.unimplemented("putpmsg", ...args); }
   syscall_vfork(...args) { return this.unimplemented("vfork", ...args); }
   syscall_ugetrlimit(...args) { return this.unimplemented("ugetrlimit", ...args); }
-
-  syscall_mmap2(addr, length, prot, flags, fd, pgoffset) {
-    // PROT_READ | PROT_WRITE == 3
-    // MAP_PRIVATE | MAP_ANON == 0x22
-    if (addr !== 0 || fd !== -1 || pgoffset !== 0 ||
-        prot !== 3 || flags !== 0x22) {
-      return this.unimplemented("mmap2", ...arguments);
-    }
-
-    // this.instance.exports.memory.grow() is not implemented yet.
-
-    if (length !== 4096 || this.not_first) {
-      return this.unimplemented("mmap2", ...arguments);
-    }
-    this.not_first = true;
-
-    let mem = this.instance.exports.memory.buffer;
-    let reserved_for_mmap = 4096;
-    return mem.byteLength - reserved_for_mmap;
-  }
-
+  syscall_mmap2(...args) { return this.unimplemented("ugetrlimit", ...args); }
   syscall_truncate64(...args) { return this.unimplemented("truncate64", ...args); }
   syscall_ftruncate64(...args) { return this.unimplemented("ftruncate64", ...args); }
   syscall_stat64(...args) { return this.unimplemented("stat64", ...args); }
@@ -863,7 +841,7 @@ class Syscall {
 
   makeEnvObject() {
     return {
-      __syscall: this.syscall.bind(this)
+      env_syscall: this.syscall.bind(this)
     };
   }
 }
@@ -891,8 +869,21 @@ class Runtime {
     this.argsBufSize = argsBufSize;
   }
 
+  print(p) {
+    let mem = this.memory.buffer;
+    let s = new Uint8Array(mem, p);
+    let cs = [];
+    for (let c of s) {
+      if (!c) {
+        break;
+      }
+      cs.push(String.fromCharCode(c));
+    }
+    print(cs.join(''));
+  }
+
   printn(p, n) {
-    let mem = this.instance.exports.memory.buffer;
+    let mem = this.memory.buffer;
     let s = new Uint8Array(mem, p, n);
     let cs = [];
     for (let c of s)
@@ -905,7 +896,7 @@ class Runtime {
   }
   
   get_args(p) {
-    let mem = this.instance.exports.memory.buffer;
+    let mem = this.memory.buffer;
     let view = new DataView(mem, p, this.argsBufSize);
     let argc = this.utf8Args.length;
 
@@ -921,12 +912,19 @@ class Runtime {
     }
   }
 
+  unimplemented_syscall(nr) {
+    print("unimplemented syscall: " + nr);
+  }
+
   makeEnvObject() {
     return {
+      print: this.print.bind(this),
       printn: this.printn.bind(this),
+      dump: x=>print("dump:" + x),
       crash: ()=>quit(1),
       get_args_buffer_size: this.get_args_buffer_size.bind(this),
-      get_args: this.get_args.bind(this)
+      get_args: this.get_args.bind(this),
+      unimplemented_syscall: this.unimplemented_syscall.bind(this)
     };
   }
 }
@@ -945,7 +943,7 @@ function toUTF8(s) {
   return result;
 }
 
-(async function(program_file, ...args) {
+(async function(program_file, metadata_file, ...args) {
   let timing = new Timing();
   let binary = readbuffer(program_file);
   timing.emit("load");
@@ -963,15 +961,32 @@ function toUTF8(s) {
 
   runtime.set_args(...args);
 
+  let metadata_string = read(metadata_file)
+  let metadata = null;
+  if (metadata_string) {
+    metadata = JSON.parse(metadata_string);
+    env.memory = new WebAssembly.Memory({
+      "initial": Math.ceil(metadata.staticBump / (64 * 1024))
+    });
+  }
+
   let instance = new WebAssembly.Instance(module, {env});
+  let memory = env.memory || instance.exports.memory;
   runtime.instance = instance;
+  runtime.memory = memory;
   syscall.instance = instance;
+  syscall.memory = memory;
   timing.emit("instantiate");
+
+  if (metadata) {
+    for (let i of metadata.initializers)
+      instance.exports[i]();
+  }
 
   let rv = instance.exports.entry_point();
   timing.emit("execute");
   quit(rv);
 })(...arguments).catch(e => {
-  print(e);
+  print(e.stack);
   quit(1);
 });
