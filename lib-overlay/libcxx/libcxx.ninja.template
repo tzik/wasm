@@ -1,0 +1,7 @@
+{% for src in srcs -%}
+build {{obj_prefix}}{{src|replace('.cpp', '.ll')}} : cxx {{src_prefix}}{{src}}
+{% endfor %}
+build out/libcxx.ll: link
+{%- for src in srcs %} $
+  {{obj_prefix}}{{src|replace('.cpp', '.ll')}}
+{%- endfor %}

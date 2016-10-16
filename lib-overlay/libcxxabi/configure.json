@@ -1,0 +1,19 @@
+{
+  "output": "//out/libcxxabi.ninja",
+  "template": "libcxxabi.ninja.template",
+  "data": {
+    "obj_prefix": "out/libcxxabi/",
+    "src_prefix": "lib/libcxxabi/src/",
+    "srcs": [
+      "cxa_new_delete.cpp",
+      "cxa_handlers.cpp",
+      "cxa_noexception.cpp",
+      "cxa_exception_storage.cpp",
+      "fallback_malloc.cpp",
+      "abort_message.cpp",
+      "exception.cpp",
+      "cxa_virtual.cpp",
+      "stdexcept.cpp"
+    ]
+  }
+}
