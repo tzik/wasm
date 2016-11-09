@@ -3,6 +3,7 @@
 ((union { long long ll; long l[2]; }){ .ll = x }).l[1]
 #define __SYSCALL_LL_O(x) __SYSCALL_LL_E((x))
 
+long __syscall(long n, ...);
 long __syscall0(long n);
 long __syscall1(long n, long a1);
 long __syscall2(long n, long a1, long a2);

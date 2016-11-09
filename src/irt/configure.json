@@ -6,10 +6,11 @@
     "src_prefix": "src/irt/",
     "srcs": [
       "atomic.cc",
-      "irt.cc",
+      "entry_point.cc",
       "page_allocator.cc",
       "pthread.cc",
       "syscall.cc",
+      "fd.cc",
       "strtod.cc"
     ]
   }

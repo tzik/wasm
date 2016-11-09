@@ -1,32 +1,31 @@
 include etc/rules.ninja
 build build.ninja: configure
 
-subninja out/compiler-rt.ninja
-subninja out/musl.ninja
-subninja out/libcxxabi.ninja
-subninja out/libcxx.ninja
+# subninja out/compiler-rt.ninja
+# subninja out/musl.ninja
+# subninja out/libcxxabi.ninja
+# subninja out/libcxx.ninja
 subninja out/irt.ninja
 subninja out/hello_world.ninja
 
-build out/main.preopt.ll: link $
-  out/main.ll $
-  out/irt.ll $
-  out/libcxx.ll $
-  out/libcxxabi.ll $
-  out/musl.ll $
-  out/compiler-rt.ll
-build out/main.opt.ll: opt out/main.preopt.ll
+libdir = ../backpack/dev/wasm/out/lib
 
-build out/main.s: llc out/main.opt.ll
+build out/main.preopt.ll: link $
+  out/hello_world.ll $
+  out/irt.ll $
+  ${libdir}/wasm.ll
+build out/main.ll: opt out/main.preopt.ll
+
+build out/main.s: llc out/main.ll
 build out/main.preopt.wast: s2wast out/main.s
 build out/main.json: metadata out/main.preopt.wast
-build out/main.opt.wast: wast-opt out/main.preopt.wast
-build out/main.wasm: wast2wasm out/main.opt.wast
+build out/main.wast: wast-opt out/main.preopt.wast
+build out/main.wasm: wast2wasm out/main.wast
 
-build out/run.stamp: run | src/run.js out/main.wasm out/main.json
-  driver = src/run.js
+build out/run.stamp: run | src/driver.js out/main.wasm out/main.json
+  driver = src/driver.js
   binary = out/main.wasm
   metadata = out/main.json
-  args = foo bar baz
+  args = foo bar baz hoge/fuga
 
 default out/run.stamp

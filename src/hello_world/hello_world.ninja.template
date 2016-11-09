@@ -1,7 +1,7 @@
 {% for src in srcs -%}
 build {{obj_prefix}}{{src|replace('.cc', '.ll')}} : cxx {{src_prefix}}{{src}}
 {% endfor %}
-build out/main.ll: link
+build out/hello_world.ll: link
 {%- for src in srcs %} $
   {{obj_prefix}}{{src|replace('.cc', '.ll')}}
 {%- endfor %}
