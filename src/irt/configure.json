@@ -11,6 +11,8 @@
       "pthread.cc",
       "syscall.cc",
       "fd.cc",
+      "memory.cc",
+      "stub.cc",
       "strtod.cc"
     ]
   }

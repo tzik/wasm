@@ -6,6 +6,7 @@
 #include <sys/mman.h>
 #include <sys/ioctl.h>
 #include <sys/uio.h>
+#include <stdlib.h>
 extern "C" {
 #include <bits/syscall.h>
 #include <syscall_arch.h>
@@ -30,6 +31,8 @@ long sys_ioctl(va_list argp) {
 }
 
 long sys_mmap2(va_list argp) {
+  abort();
+
   void* addr = va_arg(argp, void*);
   size_t length = va_arg(argp, size_t);
   int prot = va_arg(argp, int);

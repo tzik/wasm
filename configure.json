@@ -1,12 +1,9 @@
 {
   "output": "build.ninja",
   "template": "build.ninja.template",
+  "environments": ["wasm_dir"],
   "data": {},
   "components": [
-    "lib-overlay/compiler-rt",
-    "lib-overlay/musl",
-    "lib-overlay/libcxxabi",
-    "lib-overlay/libcxx",
     "src"
   ]
 }

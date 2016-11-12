@@ -25,6 +25,9 @@ def generate_build_file(wd):
   with open(configure_file) as fp:
     configure = json.load(fp)
 
+  for name in configure.get('environments', []):
+    configure['data'][name] = os.environ.get(name, '')
+
   build_file = None
   deps = [configure_file]
   if 'output' in configure:

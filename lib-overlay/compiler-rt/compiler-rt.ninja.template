@@ -1,7 +1,0 @@
-{% for src in srcs -%}
-build {{obj_prefix}}{{src|replace('.c', '.ll')}} : cc {{src_prefix}}{{src}}
-{% endfor %}
-build out/compiler-rt.ll: link
-{%- for src in srcs %} $
-  {{obj_prefix}}{{src|replace('.c', '.ll')}}
-{%- endfor %}

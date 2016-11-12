@@ -1,17 +1,13 @@
 
-extern "C" {
-#include <bits/syscall.h>
-#include <errno.h>
-#include <stdarg.h>
-#include <stddef.h>
-#include <syscall_arch.h>
-}
+#include "env.h"
 
-extern "C" long env_brk(va_list argp);
-extern "C" void env_stdout(const void* buf, size_t length);
+#include <stdint.h>
+#include <syscall.h>
+#include <errno.h>
 
 namespace irt {
 
+long sys_brk(va_list argp);
 long sys_ioctl(va_list argp);
 long sys_write(va_list argp);
 long sys_writev(va_list argp);
@@ -21,7 +17,7 @@ using syscall_handler_t = long(*)(va_list argp);
 syscall_handler_t get_syscall_handler(long nr) {
   switch (nr) {
     case SYS_ioctl: return sys_ioctl;
-    case SYS_brk: return env_brk;
+    case SYS_brk: return sys_brk;
     case SYS_write: return sys_write;
     case SYS_writev: return sys_writev;
     case SYS_mmap2: return sys_mmap2;

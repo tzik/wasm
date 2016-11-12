@@ -1,21 +1,17 @@
+
+wasm_dir = {{wasm_dir}}
+
 include etc/rules.ninja
 build build.ninja: configure
 
-# subninja out/compiler-rt.ninja
-# subninja out/musl.ninja
-# subninja out/libcxxabi.ninja
-# subninja out/libcxx.ninja
 subninja out/irt.ninja
 subninja out/hello_world.ninja
-
-libdir = ../backpack/dev/wasm/out/lib
 
 build out/main.preopt.ll: link $
   out/hello_world.ll $
   out/irt.ll $
-  ${libdir}/wasm.ll
+  $wasm_dir/lib/wasm.ll
 build out/main.ll: opt out/main.preopt.ll
-
 build out/main.s: llc out/main.ll
 build out/main.preopt.wast: s2wast out/main.s
 build out/main.json: metadata out/main.preopt.wast

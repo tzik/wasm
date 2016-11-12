@@ -79,7 +79,8 @@ class Runtime {
       env_get_args_buffer_size: this.env_get_args_buffer_size.bind(this),
       env_get_args: this.env_get_args.bind(this),
       env_brk: this.env_brk.bind(this),
-      env_stdout: this.env_stdout.bind(this)
+      env_stdout: this.env_stdout.bind(this),
+      env_dump: x => print(x)
     };
   }
 }
