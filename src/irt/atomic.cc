@@ -95,10 +95,8 @@ int a_ctz_64(uint64_t x) {
   //     : "=&r"(r) : "r"((unsigned)x), "r"((unsigned)(x>>32)) );
   // return r;
 
-  // crash();
-  // return 0;
-  uint64_t r = 0;
-  __asm__("i64.ctz %0=, %1" : "=r"(r) : "r"(x));
+  volatile uint64_t r = 0;
+  __asm__ volatile("i64.ctz %0=, %1" : "=r"(r) : "r"(x));
   return r;
 }
 
@@ -107,7 +105,7 @@ extern "C" int a_ctz_l(unsigned long x) {
   // __asm__( "bsf %1,%0" : "=r"(r) : "r"(x) );
   // return r;
 
-  int r = 0;
-  __asm__("i32.ctz %0=, %1" : "=r"(r) : "r"(x));
+  volatile int r = 0;
+  __asm__ volatile("i32.ctz %0=, %1" : "=r"(r) : "r"(x));
   return r;
 }
