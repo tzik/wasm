@@ -5,9 +5,12 @@ A toy WebAssembly app on LLVM WebAssembly backend, Binaryen, compiler-rt, musl, 
 # Usage
 
 ```
+git clone https://github.com/tzik/dev
+./dev/update_all
+source ./dev/env.sh
+
 git clone https://github.com/tzik/wasm
 cd wasm
-./bin/checkout
-./configure
-ninja
+./wasm/configure
+ninja -C wasm
 ```
