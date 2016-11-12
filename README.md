@@ -5,7 +5,7 @@ A toy WebAssembly app on LLVM WebAssembly backend, Binaryen, compiler-rt, musl, 
 # Usage
 
 ```
-git checkout https://github.com/tzik/wasm
+git clone https://github.com/tzik/wasm
 cd wasm
 ./bin/checkout
 ./configure
