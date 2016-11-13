@@ -7,7 +7,6 @@
     "srcs": [
       "atomic.cc",
       "entry_point.cc",
-      "page_allocator.cc",
       "pthread.cc",
       "syscall.cc",
       "fd.cc",

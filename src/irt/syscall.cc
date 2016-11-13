@@ -11,7 +11,6 @@ long sys_brk(va_list argp);
 long sys_ioctl(va_list argp);
 long sys_write(va_list argp);
 long sys_writev(va_list argp);
-long sys_mmap2(va_list argp);
 
 using syscall_handler_t = long(*)(va_list argp);
 syscall_handler_t get_syscall_handler(long nr) {
@@ -20,7 +19,6 @@ syscall_handler_t get_syscall_handler(long nr) {
     case SYS_brk: return sys_brk;
     case SYS_write: return sys_write;
     case SYS_writev: return sys_writev;
-    case SYS_mmap2: return sys_mmap2;
     default: return nullptr;
   }
 }

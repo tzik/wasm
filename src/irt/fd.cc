@@ -30,25 +30,6 @@ long sys_ioctl(va_list argp) {
   return 0;
 }
 
-long sys_mmap2(va_list argp) {
-  abort();
-
-  void* addr = va_arg(argp, void*);
-  size_t length = va_arg(argp, size_t);
-  int prot = va_arg(argp, int);
-  int flags = va_arg(argp, int);
-  int fd = va_arg(argp, int);
-  off_t pgoffset = va_arg(argp, off_t);
-
-  if (addr || fd != -1 || pgoffset != 0 ||
-      prot != (PROT_READ | PROT_WRITE) ||
-      flags != (MAP_PRIVATE | MAP_ANONYMOUS)) {
-    return -ENOSYS;
-  }
-
-  return reinterpret_cast<long>(allocate(length));
-}
-
 long sys_write(va_list argp) {
   int fd = va_arg(argp, int);
   const void* buf = va_arg(argp, const void*);
